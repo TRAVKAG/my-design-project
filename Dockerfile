@@ -2,11 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Устанавливаем aiogram
-RUN pip install --no-cache-dir aiogram
+# Устанавливаем библиотеки для бота и веб-сервера
+RUN pip install --no-cache-dir aiogram aiohttp
 
-# Копируем файлы проекта
+# Копируем все файлы проекта в контейнер
 COPY . /app
 
-# Команда запуска бота
+# Запускаем бота
 CMD ["python", "bot.py"]

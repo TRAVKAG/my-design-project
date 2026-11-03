@@ -1,3 +1,5 @@
+import os
+from aiohttp import web
 import asyncio
 import sqlite3
 import logging
@@ -341,11 +343,30 @@ async def cb_legal(callback: types.CallbackQuery):
     await callback.message.edit_text(text, reply_markup=builder.as_markup(), disable_web_page_preview=True)
     await callback.answer()
 
+# ==================== ФЕЙКОВЫЙ HTTP-СЕРВЕР ДЛЯ INQUIR ====================
+async def handle_ping(request):
+    return web.Response(text="Bot is running!")
+
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get("/", handle_ping)
+    app.router.add_get("/health", handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 3000))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+
 # ==================== ЗАПУСК ====================
 async def main():
     logging.basicConfig(level=logging.INFO)
     init_db()
-    print("✅ База данных инициализирована. Бот RAM VPN запущен!")
+    await start_web_server()
+    print("✅ База данных и HTTP-сервер инициализированы. Бот RAM VPN запущен!")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
